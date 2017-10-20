@@ -16,5 +16,8 @@
     "progressbar"
   ],
   "author": "Tim Perry <pimterry@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "node-blinkt": "Irrelon/node-blinkt#2324852"
+  }
 }
