@@ -137,9 +137,7 @@ const updateState = () => {
   });
 
   if (walls[0][2] === 0) {
-    // TODO: Update collision detection for new approach
-    if ((walls[0][0] === Position.TOP && birdPosition <= 1) ||
-      (walls[0][0] === Position.BOTTOM && birdPosition >= 2)) {
+    if (_.includes(walls[1], birdPosition)) {
       flashState = 0;
     }
   }
