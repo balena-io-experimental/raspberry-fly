@@ -1,5 +1,23 @@
+const metawear = require('node-metawear');
 const ws281x = require('rpi-ws281x-native');
 const _ = require('lodash');
+
+function scanForControllers() {
+  return new Promise((resolve, reject) => {
+    metawear.discover((device) => {
+      console.log('Found', device.id);
+
+      device.connectAndSetup((error) => {
+        if (error) {
+          console.log('Connection error!');
+          return scanForControllers();
+        } else {
+          resolve(device);
+        }
+      });
+    });
+  });
+}
 
 ws281x.init(32);
 
@@ -11,27 +29,82 @@ const zeros = [
 ];
 
 ws281x.render(zeros);
-let background = zeros;
+
+console.log('Scanning for controllers');
+let connectingInterval = showConnecting();
+scanForControllers().then((device) => {
+  console.log('Controller connected!');
+
+  let button = new device.Switch(device);
+  button.register();
+
+  button.onChange((pressed) => {
+    if (pressed === 0) {
+      console.log('Button pressed');
+      onButtonPress();
+    }
+  });
+
+  device.on('disconnect', () => {
+    console.log('Controller disconnected');
+    ws281x.render(zeros);
+    process.exit(0);
+  });
+
+  clearInterval(connectingInterval);
+  startGame();
+});
 
 const Position = {
   TOP: 0,
   BOTTOM: 1
 }
 
-let birdPosition = 2;
-let flashState = false;
-let tick = 0;
-let walls = [
-  [Position.TOP, 7]
-];
+// Woooo, global stateeeeee
+let background, birdPosition, flashState, buttonPressed, tick, walls, stepDuration;
 
-setInterval(() => {
-  updateState();
-  renderState();
-}, 250);
+function startGame() {
+  background = zeros;
+  birdPosition = 2;
+  flashState = false;
+  buttonPressed = false;
+  tick = 0;
+  walls = [
+    [Position.TOP, 7]
+  ];
+
+  let intervalStep = 0;
+  stepFrequency = 25;
+  interval = setInterval(() => {
+    // Only tick every 10ms * stepFreq, but steadily decrease stepFreq to 1...
+    if (intervalStep % stepFrequency !== 0) return;
+    if (intervalStep % 500 === 0) stepFrequency = Math.max(stepFrequency - 1, 1);
+
+    intervalStep += 1;
+
+    updateState();
+    renderState();
+
+    if (flashState === 4) {
+      clearInterval(interval);
+      showGameOver();
+    }
+  }, 10);
+}
+
+const onButtonPress = () => {
+  buttonPressed = true;
+}
 
 const updateState = () => {
   tick += 1;
+
+  if (buttonPressed && birdPosition > 0) {
+    birdPosition -= 1;
+    buttonPressed = false;
+  } else {
+    birdPosition = Math.min(birdPosition + 1, 3);
+  }
 
   // Add a wall every 4 ticks
   if (tick % 4 === 0) {
@@ -63,7 +136,6 @@ const updateState = () => {
       background = _.range(32).map(() => 0x555555);
     } else if (flashState === 4) {
       background = _.range(32).map(() => 0x000000);
-      flashState = false;
     }
   }
 };
@@ -83,4 +155,63 @@ const renderState = () => {
   });
 
   ws281x.render(pixels);
+}
+
+function showConnecting() {
+  const W = 0x888888;
+
+  const connectingText = [
+    0,0,0,0,0,0,0,0,0,0,W,W,0,0,W,0,0,W,0,0,W,0,W,0,0,W,0,0,W,0,0,0,W,W,0,W,W,W,0,W,0,W,0,0,W,0,0,W,W,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,W,0,0,0,W,0,W,0,W,W,W,W,0,W,W,0,W,0,W,0,W,0,W,0,0,0,0,W,0,0,W,0,W,W,0,W,0,W,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,W,0,0,0,W,0,W,0,W,0,W,W,0,W,0,W,W,0,W,W,0,0,W,0,0,0,0,W,0,0,W,0,W,0,W,W,0,W,0,W,W,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,W,W,0,0,W,0,0,W,0,0,W,0,W,0,0,W,0,0,W,W,0,0,W,W,0,0,W,0,0,W,0,W,0,0,W,0,0,W,W,0,W,0,W,0,W,0,0,0,0,0,0,0,0
+  ];
+
+  const lineLength = connectingText.length / 4;
+
+  let columnIndex = 0;
+
+  return setInterval(() => {
+    let pixels = [
+      ...connectingText.slice(columnIndex, columnIndex + 8),
+      ...connectingText.slice(columnIndex + lineLength, columnIndex + lineLength + 8),
+      ...connectingText.slice(columnIndex + lineLength*2, columnIndex + lineLength*2 + 8),
+      ...connectingText.slice(columnIndex + lineLength*3, columnIndex + lineLength*3 + 8)
+    ];
+
+    ws281x.render(pixels);
+
+    columnIndex = (columnIndex + 1) % (lineLength - 8);
+  }, 100);
+}
+
+function showGameOver() {
+  const W = 0x888888;
+
+  const gameOverText = [
+    0,0,0,0,0,0,0,0,0,W,W,0,0,0,W,0,0,0,W,0,W,0,0,0,W,0,0,0,0,0,0,W,0,0,W,0,W,0,0,W,0,0,0,W,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,W,0,0,0,0,W,0,W,0,W,0,W,0,W,0,W,0,W,0,0,0,0,W,0,W,0,W,0,W,0,W,0,W,0,W,0,W,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,W,0,W,W,0,W,W,W,0,W,0,W,0,W,0,W,W,0,0,0,0,0,W,0,W,0,W,0,W,0,W,W,0,0,W,W,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,W,W,0,0,W,0,W,0,W,0,0,0,W,0,0,W,W,0,0,0,0,0,W,0,0,0,W,0,0,0,W,W,0,W,0,W,0,0,0,0,0,0,0,0,0
+  ];
+
+  const lineLength = gameOverText.length / 4;
+
+  let columnIndex = 0;
+  let interval = setInterval(() => {
+    let pixels = [
+      ...gameOverText.slice(columnIndex, columnIndex + 8),
+      ...gameOverText.slice(columnIndex + lineLength, columnIndex + lineLength + 8),
+      ...gameOverText.slice(columnIndex + lineLength*2, columnIndex + lineLength*2 + 8),
+      ...gameOverText.slice(columnIndex + lineLength*3, columnIndex + lineLength*3 + 8)
+    ];
+    ws281x.render(pixels);
+
+    columnIndex += 1;
+
+    if (columnIndex > lineLength - 8) {
+      clearInterval(interval);
+      startGame();
+    }
+  }, 100);
 }
