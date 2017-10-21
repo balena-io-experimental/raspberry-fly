@@ -130,11 +130,11 @@ const updateState = () => {
   if (flashState !== false) {
     flashState += 1;
     if (flashState === 1) {
-      background = _.range(32).map(() => 0x555555);
+      background = _.range(32).map(() => 0x888888);
     } else if (flashState === 2) {
       background = _.range(32).map(() => 0x000000);
     } else if (flashState === 3) {
-      background = _.range(32).map(() => 0x555555);
+      background = _.range(32).map(() => 0x888888);
     } else if (flashState === 4) {
       background = _.range(32).map(() => 0x000000);
     }
@@ -143,7 +143,10 @@ const updateState = () => {
 
 const renderState = () => {
   let pixels = _.clone(background);
-  pixels[birdPosition * 8] = 0x00ff00;
+
+  if (flashState === false) {
+    pixels[birdPosition * 8] = 0x00ff00;
+  }
 
   walls.forEach((wall) => {
     if (wall[0] === Position.TOP) {
