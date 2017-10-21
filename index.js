@@ -41,7 +41,7 @@ const updateState = () => {
 
   // Shift all walls one left
   walls = walls.map((wall) => {
-    wall[1] -= 1;
+    return [wall[0], wall[1] - 1];
   }).filter((wall) => {
     wall[1] >= 0;
   });
