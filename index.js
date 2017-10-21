@@ -62,4 +62,6 @@ const renderState = () => {
       pixels[wall[1] + 24] = 0xff0000;
     }
   });
+
+  ws281x.render(pixels);
 }
