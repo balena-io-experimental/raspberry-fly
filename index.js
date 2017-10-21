@@ -136,10 +136,8 @@ const updateState = () => {
     return wall[2] >= 0;
   });
 
-  if (walls[0][2] === 0) {
-    if (_.includes(walls[1], birdPosition)) {
-      flashState = 0;
-    }
+  if (walls[0][2] === 0 && _.includes(walls[0][1], birdPosition)) {
+    flashState = 0;
   }
 
   if (flashState !== false) {
