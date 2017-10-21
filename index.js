@@ -61,7 +61,7 @@ const Position = {
 }
 
 // Woooo, global stateeeeee
-let background, birdPosition, flashState, buttonPressed, tick, walls, stepDuration;
+let background, birdPosition, flashState, buttonPressed, tick, walls;
 
 function startGame() {
   background = zeros;
@@ -74,13 +74,14 @@ function startGame() {
   ];
 
   let intervalStep = 0;
-  stepFrequency = 25;
+  let stepFrequency = 25;
   interval = setInterval(() => {
-    // Only tick every 10ms * stepFreq, but steadily decrease stepFreq to 1...
-    if (intervalStep % stepFrequency !== 0) return;
-    if (intervalStep % 500 === 0) stepFrequency = Math.max(stepFrequency - 1, 1);
-
     intervalStep += 1;
+    // Only tick every 10ms * stepFreq, but steadily decrease stepFreq to 1...
+    if (intervalStep % 500 === 0) {
+      stepFrequency = Math.max(stepFrequency - 1, 1);
+    }
+    if (intervalStep % stepFrequency !== 0) return;
 
     updateState();
     renderState();
