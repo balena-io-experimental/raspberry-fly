@@ -19,6 +19,7 @@ const Position = {
 }
 
 let birdPosition = 2;
+let flashState = false;
 let tick = 0;
 let walls = [
   [Position.TOP, 7]
@@ -38,8 +39,6 @@ const updateState = () => {
     walls.push([1 - lastWall[0], 8]);
   }
 
-  console.log(JSON.stringify(walls, null, 2));
-
   // Shift all walls one left
   walls = walls.map((wall) => {
     return [wall[0], wall[1] - 1];
@@ -50,7 +49,21 @@ const updateState = () => {
   if (walls[0][1] === 0) {
     if ((walls[0][0] === Position.TOP && birdPosition <= 1) ||
       (walls[0][0] === Position.BOTTOM && birdPosition >= 2)) {
-      flash();
+      flashState = 0;
+    }
+  }
+
+  if (flashState !== false) {
+    flashState += 1;
+    if (flashState === 1) {
+      background = _.range(32).map(() => 0xaaaaaa);
+    } else if (flashState === 2) {
+      background = _.range(32).map(() => 0x000000);
+    } else if (flashState === 3) {
+      background = _.range(32).map(() => 0xaaaaaa);
+    } else if (flashState === 4) {
+      background = _.range(32).map(() => 0x000000);
+      flashState = false;
     }
   }
 };
@@ -71,10 +84,3 @@ const renderState = () => {
 
   ws281x.render(pixels);
 }
-
-const flash = () => {
-  background = _.range(32).map(() => 0xaaaaaa);
-  setTimeout(() => background = _.range(32).map(() => 0x000000), 500);
-  setTimeout(() => background = _.range(32).map(() => 0xaaaaaa), 1500);
-  setTimeout(() => background = _.range(32).map(() => 0x000000), 2000);
-};
