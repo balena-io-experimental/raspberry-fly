@@ -18,6 +18,6 @@
   "author": "Tim Perry <pimterry@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "node-blinkt": "Irrelon/node-blinkt#2324852"
+    "rpi-ws281x-native": "^0.8.2"
   }
 }
