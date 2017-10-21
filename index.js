@@ -33,7 +33,7 @@ const updateState = () => {
 
   // Add a wall every 4 ticks
   if (tick % 4 === 0) {
-    let lastWall = walls[walls.length];
+    let lastWall = walls[walls.length - 1];
     walls.push([1 - lastWall[0], 8]);
   }
 
