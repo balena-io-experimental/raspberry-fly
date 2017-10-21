@@ -12,12 +12,52 @@ const zeros = [
 
 ws281x.render(zeros);
 
-let pixelIndex = 0;
-setInterval(() => {
-  console.log('Still alive');
+const Position = {
+  TOP: 0,
+  BOTTOM: 1
+}
 
+let birdPosition = 2;
+let tick = 0;
+let walls = [
+  [Position.TOP, 7]
+];
+
+setInterval(() => {
+  updateState();
+  renderState();
+}, 500);
+
+const updateState = () => {
+  tick += 1;
+
+  // Add a wall every 4 ticks
+  if (tick % 4 === 0) {
+    let lastWall = walls[walls.length];
+    walls.push([1 - lastWall[0], 8]);
+  }
+
+  // Shift all walls one left
+  walls = walls.map((wall) => {
+    wall[1] -= 1;
+  }).filter((wall) => {
+    wall[1] >= 0;
+  });
+
+  // TODO: Check for collisions
+};
+
+const renderState = () => {
   let pixels = _.clone(zeros);
-  pixels[pixelIndex] = 0xaa0000;
-  pixelIndex = (pixelIndex + 1) % 32;
-  ws281x.render(pixels);
-}, 100);
+  pixels[birdPosition * 8] = 0x00ff00;
+
+  walls.forEach((wall) => {
+    if (wall[0] === Position.TOP) {
+      pixels[wall[1]] = 0xff0000;
+      pixels[wall[1] + 8] = 0xff0000;
+    } else {
+      pixels[wall[1] + 16] = 0xff0000;
+      pixels[wall[1] + 24] = 0xff0000;
+    }
+  });
+}
