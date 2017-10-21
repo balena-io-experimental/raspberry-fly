@@ -43,7 +43,7 @@ const updateState = () => {
   walls = walls.map((wall) => {
     return [wall[0], wall[1] - 1];
   }).filter((wall) => {
-    wall[1] >= 0;
+    return wall[1] >= 0;
   });
 
   // TODO: Check for collisions
