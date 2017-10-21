@@ -100,8 +100,8 @@ const onButtonPress = () => {
 const updateState = () => {
   tick += 1;
 
-  if (buttonPressed && birdPosition > 0) {
-    birdPosition -= 1;
+  if (buttonPressed) {
+    birdPosition = Math.max(birdPosition - 1, 0);
     buttonPressed = false;
   } else {
     birdPosition = Math.min(birdPosition + 1, 3);
