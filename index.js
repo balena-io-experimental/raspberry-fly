@@ -28,7 +28,7 @@ let walls = [
 setInterval(() => {
   updateState();
   renderState();
-}, 500);
+}, 250);
 
 const updateState = () => {
   tick += 1;
@@ -56,11 +56,11 @@ const updateState = () => {
   if (flashState !== false) {
     flashState += 1;
     if (flashState === 1) {
-      background = _.range(32).map(() => 0xaaaaaa);
+      background = _.range(32).map(() => 0x555555);
     } else if (flashState === 2) {
       background = _.range(32).map(() => 0x000000);
     } else if (flashState === 3) {
-      background = _.range(32).map(() => 0xaaaaaa);
+      background = _.range(32).map(() => 0x555555);
     } else if (flashState === 4) {
       background = _.range(32).map(() => 0x000000);
       flashState = false;
