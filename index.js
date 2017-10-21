@@ -37,6 +37,8 @@ const updateState = () => {
     walls.push([1 - lastWall[0], 8]);
   }
 
+  console.log(JSON.stringify(walls, null, 2));
+
   // Shift all walls one left
   walls = walls.map((wall) => {
     wall[1] -= 1;
