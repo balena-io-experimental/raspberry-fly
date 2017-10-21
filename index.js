@@ -70,7 +70,7 @@ function startGame() {
   buttonPressed = false;
   tick = 0;
   walls = [
-    [Position.TOP, 7]
+    [Position.TOP, [0, 1], 7]
   ];
 
   let intervalStep = 0;
@@ -110,7 +110,23 @@ const updateState = () => {
   // Add a wall every 4 ticks
   if (tick % 4 === 0) {
     let lastWall = walls[walls.length - 1];
-    walls.push([1 - lastWall[0], 8]);
+    let position = 1 - lastWall[0];
+
+    if (position === Position.TOP) {
+      walls.push([position, _.sample([
+        [0, 1, 2],
+        [0, 1],
+        [0, 1],
+        [0]
+      ]), 8]);
+    } else {
+      walls.push([position, _.sample([
+        [1, 2, 3],
+        [2, 3],
+        [2, 3],
+        [3]
+      ]), 8]);
+    }
   }
 
   // Shift all walls one left
