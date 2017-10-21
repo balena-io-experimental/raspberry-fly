@@ -11,6 +11,7 @@ const zeros = [
 ];
 
 ws281x.render(zeros);
+let background = zeros;
 
 const Position = {
   TOP: 0,
@@ -46,11 +47,16 @@ const updateState = () => {
     return wall[1] >= 0;
   });
 
-  // TODO: Check for collisions
+  if (walls[0][1] === 0) {
+    if ((walls[0][0] === Position.TOP && birdPosition <= 1) ||
+      (walls[0][0] === Position.BOTTOM && birdPosition >= 2)) {
+      flash();
+    }
+  }
 };
 
 const renderState = () => {
-  let pixels = _.clone(zeros);
+  let pixels = _.clone(background);
   pixels[birdPosition * 8] = 0x00ff00;
 
   walls.forEach((wall) => {
@@ -65,3 +71,10 @@ const renderState = () => {
 
   ws281x.render(pixels);
 }
+
+const flash = () => {
+  background = _.range(32).map(() => 0xaaaaaa);
+  setTimeout(() => background = _.range(32).map(() => 0x000000), 500);
+  setTimeout(() => background = _.range(32).map(() => 0xaaaaaa), 1500);
+  setTimeout(() => background = _.range(32).map(() => 0x000000), 2000);
+};
