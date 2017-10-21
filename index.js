@@ -131,12 +131,13 @@ const updateState = () => {
 
   // Shift all walls one left
   walls = walls.map((wall) => {
-    return [wall[0], wall[1] - 1];
+    return [wall[0], wall[1], wall[2] - 1];
   }).filter((wall) => {
-    return wall[1] >= 0;
+    return wall[2] >= 0;
   });
 
-  if (walls[0][1] === 0) {
+  if (walls[0][2] === 0) {
+    // TODO: Update collision detection for new approach
     if ((walls[0][0] === Position.TOP && birdPosition <= 1) ||
       (walls[0][0] === Position.BOTTOM && birdPosition >= 2)) {
       flashState = 0;
@@ -165,13 +166,9 @@ const renderState = () => {
   }
 
   walls.forEach((wall) => {
-    if (wall[0] === Position.TOP) {
-      pixels[wall[1]] = 0xff0000;
-      pixels[wall[1] + 8] = 0xff0000;
-    } else {
-      pixels[wall[1] + 16] = 0xff0000;
-      pixels[wall[1] + 24] = 0xff0000;
-    }
+    wall[1].forEach((cell) => {
+      pixels[wall[2] + cell*8] = 0xff0000;
+    });
   });
 
   ws281x.render(pixels);
