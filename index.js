@@ -163,12 +163,12 @@ const renderState = () => {
 
   // If we're crashing, we hide the bird as we animate out
   if (crashState === false) {
-    pixels[birdPosition * 8] = 0x00ff00;
+    pixels[birdPosition * 8] = 0xdd5555;
   }
 
   walls.forEach((wall) => {
     wall[1].forEach((cell) => {
-      pixels[wall[2] + cell*8] = 0xff0000;
+      pixels[wall[2] + cell*8] = 0x00ff00;
     });
   });
 
@@ -176,7 +176,7 @@ const renderState = () => {
 }
 
 function showConnecting() {
-  const W = 0x888888;
+  const W = 0x333333;
 
   // This is ridiculous and I love it
   const connectingText = [
