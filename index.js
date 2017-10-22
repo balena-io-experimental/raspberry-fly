@@ -61,15 +61,17 @@ const Position = {
 }
 
 // Woooo, global stateeeeee
-let background, birdPosition, flashState, buttonPressed, tick, walls;
+let background, birdPosition, crashState, buttonPressed, tick, walls;
 
 function startGame() {
   background = zeros;
-  birdPosition = 2;
-  flashState = false;
+  birdPosition = 2; // y coordinate: from 0 to 3, top to bottom
+  crashState = false;
   buttonPressed = false;
   tick = 0;
   walls = [
+    // Every wall consists of:
+    // [TOP/BOTTOM, yCoord[], xCoord]
     [Position.TOP, [0, 1], 7]
   ];
 
@@ -78,15 +80,13 @@ function startGame() {
   interval = setInterval(() => {
     intervalStep += 1;
     // Only tick every 10ms * stepFreq, but steadily decrease stepFreq to 1...
-    if (intervalStep % 500 === 0) {
-      stepFrequency = Math.max(stepFrequency - 1, 1);
-    }
+    if (intervalStep % 500 === 0) stepFrequency = Math.max(stepFrequency - 1, 1);
     if (intervalStep % stepFrequency !== 0) return;
 
     updateState();
     renderState();
 
-    if (flashState === 4) {
+    if (crashState === 4) {
       clearInterval(interval);
       showGameOver();
     }
@@ -100,6 +100,7 @@ const onButtonPress = () => {
 const updateState = () => {
   tick += 1;
 
+  // Handle any input since the last tick
   if (buttonPressed) {
     birdPosition = Math.max(birdPosition - 1, 0);
     buttonPressed = false;
@@ -124,6 +125,7 @@ const updateState = () => {
         [1, 2, 3],
         [2, 3],
         [2, 3],
+        [2, 3],
         [3]
       ]), 8]);
     }
@@ -136,19 +138,21 @@ const updateState = () => {
     return wall[2] >= 0;
   });
 
+  // Trigger a crash if we've hit a wall
   if (walls[0][2] === 0 && _.includes(walls[0][1], birdPosition)) {
-    flashState = 0;
+    crashState = 0;
   }
 
-  if (flashState !== false) {
-    flashState += 1;
-    if (flashState === 1) {
+  // Render a crash animation (blink the background, with the bird hidden) if we're crashing
+  if (crashState !== false) {
+    crashState += 1;
+    if (crashState === 1) {
       background = _.range(32).map(() => 0x888888);
-    } else if (flashState === 2) {
+    } else if (crashState === 2) {
       background = _.range(32).map(() => 0x000000);
-    } else if (flashState === 3) {
+    } else if (crashState === 3) {
       background = _.range(32).map(() => 0x888888);
-    } else if (flashState === 4) {
+    } else if (crashState === 4) {
       background = _.range(32).map(() => 0x000000);
     }
   }
@@ -157,7 +161,8 @@ const updateState = () => {
 const renderState = () => {
   let pixels = _.clone(background);
 
-  if (flashState === false) {
+  // If we're crashing, we hide the bird as we animate out
+  if (crashState === false) {
     pixels[birdPosition * 8] = 0x00ff00;
   }
 
@@ -173,9 +178,10 @@ const renderState = () => {
 function showConnecting() {
   const W = 0x888888;
 
+  // This is ridiculous and I love it
   const connectingText = [
     0,0,0,0,0,0,0,0,0,0,W,W,0,0,W,0,0,W,0,0,W,0,W,0,0,W,0,0,W,0,0,0,W,W,0,W,W,W,0,W,0,W,0,0,W,0,0,W,W,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,W,0,0,0,W,0,W,0,W,W,W,W,0,W,W,0,W,0,W,0,W,0,W,0,0,0,0,W,0,0,W,0,W,W,0,W,0,W,0,0,,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,W,0,0,0,W,0,W,0,W,W,0,W,0,W,W,0,W,0,W,0,W,0,W,0,0,0,0,W,0,0,W,0,W,W,0,W,0,W,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,W,0,0,0,W,0,W,0,W,0,W,W,0,W,0,W,W,0,W,W,0,0,W,0,0,0,0,W,0,0,W,0,W,0,W,W,0,W,0,W,W,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,W,W,0,0,W,0,0,W,0,0,W,0,W,0,0,W,0,0,W,W,0,0,W,W,0,0,W,0,0,W,0,W,0,0,W,0,0,W,W,0,W,0,W,0,W,0,0,0,0,0,0,0,0
   ];
@@ -194,11 +200,14 @@ function showConnecting() {
 
     ws281x.render(pixels);
 
+    // When we run out of columns to add, loop around to the start again
     columnIndex = (columnIndex + 1) % (lineLength - 8);
   }, 100);
 }
 
 function showGameOver() {
+  // This could probably be heavily refactored to commonize the logic with the connecting
+  // animation above, but who has time for that.
   const W = 0x888888;
 
   const gameOverText = [
@@ -222,6 +231,7 @@ function showGameOver() {
 
     columnIndex += 1;
 
+    // When we run out of columns to add, start a new game
     if (columnIndex > lineLength - 8) {
       clearInterval(interval);
       startGame();
