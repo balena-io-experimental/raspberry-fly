@@ -79,8 +79,8 @@ function startGame() {
   let stepFrequency = 25;
   interval = setInterval(() => {
     intervalStep += 1;
-    // Only tick every 10ms * stepFreq, but steadily decrease stepFreq to 1...
-    if (intervalStep % 500 === 0) stepFrequency = Math.max(stepFrequency - 1, 1);
+    // Only tick every 20ms * stepFreq, but steadily decrease stepFreq to 1...
+    if (intervalStep % 50 === 0) stepFrequency = Math.max(stepFrequency - 1, 1);
     if (intervalStep % stepFrequency !== 0) return;
 
     updateState();
@@ -90,7 +90,7 @@ function startGame() {
       clearInterval(interval);
       showGameOver();
     }
-  }, 10);
+  }, 20);
 }
 
 const onButtonPress = () => {
