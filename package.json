@@ -1,22 +1,24 @@
 {
-  "name": "blinkt-progressbar",
+  "name": "raspberry-fly",
   "version": "1.0.0",
-  "description": "",
+  "description": "A flappy bird clone for the pi, with a unicorn hat UI and metawear controller",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "keywords": [
-    "blinkt",
+    "unicorn-hat",
+    "unicorn",
+    "flappy-birds",
+    "metawear",
+    "game",
     "iot",
     "resin",
-    "resin.io",
-    "progress",
-    "progressbar"
+    "resin.io"
   ],
   "author": "Tim Perry <pimterry@gmail.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "lodash": "^4.17.4",
     "node-metawear": "^1.0.1",
